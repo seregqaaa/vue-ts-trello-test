@@ -3,11 +3,7 @@
     <div class="card">
       <h3 class="card-title">{{ title }}</h3>
       <ul class="card-list">
-        <li class="card-item" v-for="task in tasks" :key="task.id" @click="onTaskClick(task.id)">
-          <span class="item-title">{{ task.title }}</span>
-          <span class="item-icon" @click.stop="onTaskDelete(task.id)">×</span>
-          <span class="item-description"></span>
-        </li>
+        <card-task v-for="task in tasks" :key="task.id" :task="task" :cardId="cardId" />
       </ul>
       <input v-model="newTaskTitle" @keypress.enter="onTaskEnter" type="text" placeholder="+ Create new task" />
     </div>
@@ -15,12 +11,16 @@
 </template>
 
 <script lang="ts">
-import { ADD_TASK, REMOVE_TASK } from '@/constants'
+import CardTask from '@/components/CardTask.vue'
+import { ADD_TASK } from '@/constants'
+
 import { Task } from '@/types'
 import { uuid } from '@/utils'
 import { Component, Vue, Prop } from 'vue-property-decorator'
 
-@Component
+@Component({
+  components: { CardTask }
+})
 export default class extends Vue {
   @Prop() private title!: string
   @Prop() private tasks!: Array<Task>
@@ -28,24 +28,13 @@ export default class extends Vue {
 
   private newTaskTitle = ''
 
-  private onTaskEnter(): void {
+  private onTaskEnter() {
     const newTask: Task = {
-      title: this.newTaskTitle,
-      id: uuid()
+      id: uuid(),
+      title: this.newTaskTitle
     }
     this.$store.dispatch(ADD_TASK, { newTask, cardId: this.cardId })
     this.newTaskTitle = ''
-  }
-
-  private onTaskDelete(taskId: string): void {
-    this.$store.dispatch(REMOVE_TASK, {
-      cardId: this.cardId,
-      taskId
-    })
-  }
-
-  private onTaskClick(taskId: string): void {
-    this.$router.push({ name: 'Task', params: { id: taskId } })
   }
 }
 </script>
@@ -66,55 +55,6 @@ export default class extends Vue {
   font-size: 2.4rem;
   padding-bottom: 2rem;
   text-align: center;
-}
-
-.card-item {
-  position: relative;
-  padding: 0.5rem 1rem;
-  margin-bottom: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.card-item:last-child {
-  margin-bottom: 0;
-}
-
-.card-item:hover {
-  border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.item-title {
-  display: block;
-  padding-bottom: 0.2rem;
-  font-size: 1.8rem;
-  user-select: none;
-}
-
-.item-icon {
-  display: none;
-}
-
-.card-item:hover > .item-icon {
-  display: inline;
-  user-select: none;
-  position: absolute;
-  right: 1rem;
-  bottom: 0.1rem;
-  font-size: 2.4rem;
-  cursor: pointer;
-  color: rgba(0, 0, 0, 0.5);
-  transition: color 0.1s ease;
-}
-
-.card-item:hover > .item-icon:hover {
-  color: rgb(175, 0, 0);
-  transform: scale(1.1);
-}
-
-.item-description {
-  font-size: 1.2rem;
-  user-select: none;
 }
 
 input {

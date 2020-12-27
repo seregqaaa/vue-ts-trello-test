@@ -10,9 +10,9 @@ const routes: Array<RouteConfig> = [
     component: () => import('@/views/Home.vue')
   },
   {
-    path: '/task/:id',
-    name: 'Task',
-    component: () => import('@/components/TaskModal.vue')
+    path: '*',
+    name: 'AnyPage',
+    component: () => import('@/views/Home.vue')
   }
 ]
 

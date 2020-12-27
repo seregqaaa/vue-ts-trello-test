@@ -37,8 +37,11 @@ export default new Vuex.Store({
   getters: {
     [CARDS]: (state: State): Array<Card> => state.cards,
     [CARD]: (state: State) => (id: string): Card => findById(state.cards, id),
-    [TASK]: (_: State, getters: any) => (cardId: string, taskId: string): Task =>
-      findById(getters[CARD](cardId).tasks, taskId),
+    [TASK]: (state: State, getters: any) => (cardId: string, taskId: string): Task => {
+      console.log(getters[CARD](cardId))
+      debugger
+      return findById(getters[CARD](cardId).tasks, taskId)
+    },
     [CARD_INDEX]: (state: State) => (id: string): number => findIndexById(state.cards, id),
     [TASK_INDEX]: (_: State, getters: any) => (cardId: string, taskId: string): number =>
       findIndexById(getters[CARD](cardId).tasks, taskId)
