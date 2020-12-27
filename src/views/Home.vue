@@ -57,20 +57,21 @@ export default class extends Vue {
 <style scoped>
 #home {
   min-height: 100vh;
-  width: 100%;
   background-color: rgb(10, 10, 30);
   padding: 30px 50px;
 }
 
 .home-body {
-  display: inline-block;
-  min-height: 100%;
-  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
 }
 
-.home-body div {
-  display: flex;
-  flex-flow: row wrap;
+.home-body > div:not(:last-child) {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-gap: 20px;
 }
 
 /*transition*/

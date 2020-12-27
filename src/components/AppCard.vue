@@ -90,9 +90,7 @@ export default class extends Vue {
   display: flex;
   flex-flow: column nowrap;
   padding: 30px;
-  margin: 15px;
   background-color: #eee;
-  width: 350px;
   border-radius: 25px;
   transition: all 0.2s ease;
 }

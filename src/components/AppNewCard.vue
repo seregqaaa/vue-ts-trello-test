@@ -24,11 +24,15 @@ export default class extends Vue {
 </script>
 
 <style scoped>
+.new-card-wrapper {
+  margin: 15px;
+  width: 350px;
+}
+
 .new-card {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 15px;
   background-color: transparent;
   border: 5px dashed rgba(255, 255, 255, 0.5);
   border-radius: 25px;
