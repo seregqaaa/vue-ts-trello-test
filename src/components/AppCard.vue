@@ -1,5 +1,6 @@
 <template>
   <div class="card-wrapper">
+    <!-- <transition name="bounce"> -->
     <div class="card">
       <div class="title-wrapper">
         <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ title }}</h3>
@@ -29,13 +30,15 @@
         class="new-task"
         placeholder="+ Create new task"
       />
+      <button class="card-remove" @click="onCardRemove">Remove</button>
     </div>
+    <!-- </transition> -->
   </div>
 </template>
 
 <script lang="ts">
 import CardTask from '@/components/CardTask.vue'
-import { ADD_TASK } from '@/constants'
+import { ADD_TASK, REMOVE_CARD } from '@/constants'
 
 import { Task } from '@/types'
 import { uuid } from '@/utils'
@@ -74,11 +77,16 @@ export default class extends Vue {
     this.isTitleEditing = false
     this.$emit('on-new-card-title', this.cardId, this.cardTitle)
   }
+
+  private onCardRemove(): void {
+    this.$store.dispatch(REMOVE_CARD, this.cardId)
+  }
 }
 </script>
 
 <style scoped>
 .card {
+  position: relative;
   display: flex;
   flex-flow: column nowrap;
   padding: 30px;
@@ -86,7 +94,7 @@ export default class extends Vue {
   background-color: #eee;
   width: 350px;
   border-radius: 25px;
-  transition: height 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .title-wrapper > input {
@@ -100,6 +108,28 @@ export default class extends Vue {
   text-align: center;
 }
 
+.card-remove {
+  display: none;
+}
+
+.card:hover .card-remove {
+  display: flex;
+  position: absolute;
+  font-size: 1.4rem;
+  font-weight: 700;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.card:hover .card-remove:hover {
+  opacity: 0.9;
+  color: rgb(175, 0, 0);
+}
+
 h3.card-title:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -109,6 +139,6 @@ h3.card-title:hover {
   font-size: 1.4rem;
   border: 0;
   background-color: transparent;
-  width: 100%;
+  width: 80%;
 }
 </style>

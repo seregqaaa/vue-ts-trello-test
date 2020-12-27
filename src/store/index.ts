@@ -9,7 +9,8 @@ import {
   TASK,
   CARD,
   UPDATE_CARD_TITLE,
-  UPDATE_TASK
+  UPDATE_TASK,
+  REMOVE_CARD
 } from '@/constants'
 import { Card, State, Task } from '@/types'
 import { findById, findIndexById, saveStatePlugin } from '@/utils'
@@ -30,6 +31,9 @@ export default new Vuex.Store({
     },
     [REMOVE_TASK](state: State, { cardIndex, taskIndex }: { cardIndex: number; taskIndex: number }): void {
       state.cards[cardIndex].tasks.splice(taskIndex, 1)
+    },
+    [REMOVE_CARD](state: State, cardIndex: number) {
+      state.cards.splice(cardIndex, 1)
     },
     [UPDATE_TASK](state: State, { updatedTask, cardIndex }: { updatedTask: Task; cardIndex: number }): void {
       state.cards[cardIndex].tasks = state.cards[cardIndex].tasks.map(
@@ -52,6 +56,9 @@ export default new Vuex.Store({
         cardIndex: ctx.getters[CARD_INDEX](cardId),
         taskIndex: ctx.getters[TASK_INDEX](cardId, taskId)
       })
+    },
+    [REMOVE_CARD](ctx, cardId: string): void {
+      ctx.commit(REMOVE_CARD, ctx.getters[CARD_INDEX](cardId))
     },
     [UPDATE_TASK](ctx, { updatedTask, cardId }: { updatedTask: Task; cardId: string }): void {
       ctx.commit(UPDATE_TASK, { updatedTask, cardIndex: ctx.getters[CARD_INDEX](cardId) })

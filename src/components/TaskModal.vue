@@ -16,6 +16,7 @@
       <div class="modal-body">
         <p>Description:</p>
         <textarea class="modal-area" v-model="description"></textarea>
+        <span class="area-counter">{{ description.length }}</span>
       </div>
       <div class="modal-buttons">
         <button class="btn btn-accept" @click="onAccept">Accept</button>
@@ -84,6 +85,7 @@ export default class extends Vue {
 }
 
 .modal {
+  position: relative;
   padding: 30px;
   width: 500px;
   min-height: 300px;
@@ -122,6 +124,14 @@ h1.modal-title:hover {
   max-height: 400px;
   font-size: 1.6rem;
   padding: 10px 20px;
+}
+
+.area-counter {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+  font-size: 0.8rem;
+  color: darkslategray;
 }
 
 .modal-buttons {

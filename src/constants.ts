@@ -18,6 +18,7 @@ export const initialState = {
 
 export const ADD_TASK = 'ADD_TASK'
 export const REMOVE_TASK = 'REMOVE_TASK'
+export const REMOVE_CARD = 'REMOVE_CARD'
 export const ADD_CARD = 'ADD_CARD'
 export const CARDS = 'CARDS'
 export const TASK = 'TASK'
