@@ -1,6 +1,5 @@
 <template>
   <div class="card-wrapper">
-    <!-- <transition name="bounce"> -->
     <div class="card">
       <div class="title-wrapper">
         <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ title }}</h3>
@@ -32,7 +31,6 @@
       />
       <button class="card-remove" @click="onCardRemove">Remove</button>
     </div>
-    <!-- </transition> -->
   </div>
 </template>
 
@@ -98,6 +96,7 @@ export default class extends Vue {
 .title-wrapper > input {
   display: flex;
   justify-content: center;
+  max-width: 100%;
 }
 
 .card-title {
