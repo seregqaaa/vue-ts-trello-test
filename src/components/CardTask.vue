@@ -1,5 +1,5 @@
 <template>
-  <li class="card-item">
+  <li class="card-item" @click="$emit('click')">
     <div class="item-body">
       <span class="item-title">{{ task.title }}</span>
       <span class="item-description">{{

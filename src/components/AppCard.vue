@@ -3,7 +3,13 @@
     <div class="card">
       <h3 class="card-title">{{ title }}</h3>
       <ul class="card-list">
-        <card-task v-for="task in tasks" :key="task.id" :task="task" :cardId="cardId" />
+        <card-task
+          v-for="task in tasks"
+          :key="task.id"
+          :task="task"
+          :cardId="cardId"
+          @click="$emit('on-task-click', task, cardId)"
+        />
       </ul>
       <input v-model="newTaskTitle" @keypress.enter="onTaskEnter" type="text" placeholder="+ Create new task" />
     </div>
@@ -28,7 +34,7 @@ export default class extends Vue {
 
   private newTaskTitle = ''
 
-  private onTaskEnter() {
+  private onTaskEnter(): void {
     const newTask: Task = {
       id: uuid(),
       title: this.newTaskTitle

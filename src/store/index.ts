@@ -1,4 +1,15 @@
-import { ADD_TASK, ADD_CARD, CARDS, REMOVE_TASK, TASK_INDEX, CARD_INDEX, initialState, TASK, CARD } from '@/constants'
+import {
+  ADD_TASK,
+  ADD_CARD,
+  CARDS,
+  REMOVE_TASK,
+  TASK_INDEX,
+  CARD_INDEX,
+  initialState,
+  TASK,
+  CARD,
+  UPDATE_TASK
+} from '@/constants'
 import { Card, State, Task } from '@/types'
 import { findById, findIndexById, saveStatePlugin } from '@/utils'
 import Vue from 'vue'
@@ -18,6 +29,11 @@ export default new Vuex.Store({
     },
     [REMOVE_TASK](state: State, { cardIndex, taskIndex }: { cardIndex: number; taskIndex: number }): void {
       state.cards[cardIndex].tasks.splice(taskIndex, 1)
+    },
+    [UPDATE_TASK](state: State, { updatedTask, cardIndex }: { updatedTask: Task; cardIndex: number }) {
+      state.cards[cardIndex].tasks = state.cards[cardIndex].tasks.map(
+        (task: Task): Task => (task.id === updatedTask.id ? updatedTask : task)
+      )
     }
   },
   actions: {
@@ -32,14 +48,15 @@ export default new Vuex.Store({
         cardIndex: ctx.getters[CARD_INDEX](cardId),
         taskIndex: ctx.getters[TASK_INDEX](cardId, taskId)
       })
+    },
+    [UPDATE_TASK](ctx, { updatedTask, cardId }: { updatedTask: Task; cardId: string }): void {
+      ctx.commit(UPDATE_TASK, { updatedTask, cardIndex: ctx.getters[CARD_INDEX](cardId) })
     }
   },
   getters: {
     [CARDS]: (state: State): Array<Card> => state.cards,
     [CARD]: (state: State) => (id: string): Card => findById(state.cards, id),
-    [TASK]: (state: State, getters: any) => (cardId: string, taskId: string): Task => {
-      console.log(getters[CARD](cardId))
-      debugger
+    [TASK]: (_: State, getters: any) => (cardId: string, taskId: string): Task => {
       return findById(getters[CARD](cardId).tasks, taskId)
     },
     [CARD_INDEX]: (state: State) => (id: string): number => findIndexById(state.cards, id),

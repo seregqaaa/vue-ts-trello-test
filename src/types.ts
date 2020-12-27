@@ -6,7 +6,7 @@ export type Task = {
 
 export type Card = {
   title: string
-  tasks: Array<Task | {}>
+  tasks: Array<Task>
   id: string
 }
 
