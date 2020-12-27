@@ -26,5 +26,7 @@ export default class extends Vue {
   width: 100%;
   background-color: rgb(10, 10, 30);
   padding: 50px;
+  display: flex;
+  flex-flow: row wrap;
 }
 </style>
