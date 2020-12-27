@@ -2,8 +2,16 @@
   <div class="modal-wrapper">
     <div class="modal">
       <div class="title-wrapper">
-        <h1 v-if="!isTitleEditing" class="modal-title" @click="isTitleEditing = true">{{ task.title }}</h1>
-        <input v-else class="modal-title" type="text" v-model="title" @keypress.enter="isTitleEditing = false" />
+        <h1 v-if="!isTitleEditing" class="modal-title" @click="onTitleFocus">{{ title }}</h1>
+        <input
+          v-else
+          class="modal-title"
+          type="text"
+          v-model="title"
+          ref="modalTitleInput"
+          @keypress.enter="onTitleBlur"
+          @blur="onTitleBlur"
+        />
       </div>
       <div class="modal-body">
         <p>Description:</p>
@@ -28,11 +36,12 @@ export default class extends Vue {
   @Prop() cardId!: string
   private title = this.task.title
   private description = this.task.description || ''
+  private isTitleEditing = false
 
   private onAccept(): void {
     if (this.title !== this.task.title || this.description !== this.task.description) {
       const updatedTask = { ...this.task }
-      if (this.title !== null) {
+      if (this.title) {
         updatedTask.title = this.title
       }
       if (this.description !== null) {
@@ -47,7 +56,17 @@ export default class extends Vue {
     this.$emit('on-cancel')
   }
 
-  private isTitleEditing = false
+  private onTitleFocus(): void {
+    this.isTitleEditing = true
+    const timeoutID = setTimeout(() => {
+      this.$refs.modalTitleInput.focus()
+      clearTimeout(timeoutID)
+    }, 0)
+  }
+
+  private onTitleBlur(): void {
+    this.isTitleEditing = false
+  }
 }
 </script>
 

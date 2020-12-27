@@ -1,7 +1,18 @@
 <template>
   <div class="card-wrapper">
     <div class="card">
-      <h3 class="card-title">{{ title }}</h3>
+      <div class="title-wrapper">
+        <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ title }}</h3>
+        <input
+          v-else
+          @keypress.enter.stop="onNewCardTitle"
+          @blur="onNewCardTitle"
+          ref="cardTitleInput"
+          v-model="cardTitle"
+          type="text"
+          class="card-title"
+        />
+      </div>
       <ul class="card-list">
         <card-task
           v-for="task in tasks"
@@ -11,7 +22,13 @@
           @click="$emit('on-task-click', task, cardId)"
         />
       </ul>
-      <input v-model="newTaskTitle" @keypress.enter="onTaskEnter" type="text" placeholder="+ Create new task" />
+      <input
+        v-model="newTaskTitle"
+        @keypress.enter.stop="onTaskEnter"
+        type="text"
+        class="new-task"
+        placeholder="+ Create new task"
+      />
     </div>
   </div>
 </template>
@@ -33,6 +50,8 @@ export default class extends Vue {
   @Prop() private cardId!: string
 
   private newTaskTitle = ''
+  private isTitleEditing = false
+  private cardTitle = this.title
 
   private onTaskEnter(): void {
     const newTask: Task = {
@@ -41,6 +60,19 @@ export default class extends Vue {
     }
     this.$store.dispatch(ADD_TASK, { newTask, cardId: this.cardId })
     this.newTaskTitle = ''
+  }
+
+  private onTitleFocus() {
+    this.isTitleEditing = true
+    const timeoutID = setTimeout(() => {
+      this.$refs.cardTitleInput.focus()
+      clearTimeout(timeoutID)
+    }, 0)
+  }
+
+  private onNewCardTitle(): void {
+    this.isTitleEditing = false
+    this.$emit('on-new-card-title', this.cardId, this.cardTitle)
   }
 }
 </script>
@@ -57,13 +89,22 @@ export default class extends Vue {
   transition: height 0.2s ease;
 }
 
+.title-wrapper > input {
+  display: flex;
+  justify-content: center;
+}
+
 .card-title {
   font-size: 2.4rem;
-  padding-bottom: 2rem;
+  margin-bottom: 2rem;
   text-align: center;
 }
 
-input {
+h3.card-title:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.new-task {
   margin-top: 1.8rem;
   font-size: 1.4rem;
   border: 0;

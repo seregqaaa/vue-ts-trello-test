@@ -7,6 +7,7 @@
       :tasks="card.tasks"
       :cardId="card.id"
       @on-task-click="onTaskClick"
+      @on-new-card-title="onNewCardTitle"
     />
     <task-modal v-if="currentTask" :task="currentTask" :cardId="cardId" @on-cancel="onTaskModalCancel"></task-modal>
   </div>
@@ -15,7 +16,7 @@
 <script lang="ts">
 import AppCard from '@/components/AppCard.vue'
 import TaskModal from '@/components/TaskModal.vue'
-import { CARDS } from '@/constants'
+import { CARDS, UPDATE_CARD_TITLE } from '@/constants'
 import { Card, Task } from '@/types'
 import { Component, Vue } from 'vue-property-decorator'
 
@@ -37,6 +38,10 @@ export default class extends Vue {
 
   private onTaskModalCancel(): void {
     this.currentTask = this.cardId = null
+  }
+
+  private onNewCardTitle(cardId: string, cardTitle: string): void {
+    this.$store.dispatch(UPDATE_CARD_TITLE, { cardId, cardTitle })
   }
 }
 </script>
