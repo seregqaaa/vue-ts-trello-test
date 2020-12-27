@@ -6,5 +6,8 @@ export const saveStatePlugin = (store: any): void => {
 
 export const uuid: Function = (): string => (Math.random() * 10 ** 10).toString(16)
 
-export const findById: Function = (arr: Array<Card | Task>, id: string): number =>
+export const findIndexById: Function = (arr: Array<Card | Task>, id: string): number =>
   arr.findIndex((item: Card | Task): boolean => item.id === id)
+
+export const findById: Function = (arr: Array<Card | Task>, id: string): Card | Task | undefined =>
+  arr.find(item => item.id === id)

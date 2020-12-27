@@ -8,6 +8,11 @@ const routes: Array<RouteConfig> = [
     path: '/',
     name: 'Home',
     component: () => import('@/views/Home.vue')
+  },
+  {
+    path: '/task/:id',
+    name: 'Task',
+    component: () => import('@/components/TaskModal.vue')
   }
 ]
 

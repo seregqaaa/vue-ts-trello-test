@@ -1,11 +1,11 @@
 <template>
   <div class="card-wrapper">
     <div class="card">
-      <h3 class="card-title" :contenteditable="true">{{ title }}</h3>
+      <h3 class="card-title">{{ title }}</h3>
       <ul class="card-list">
-        <li v-for="task in tasks" :key="task.id" class="card-item">
+        <li class="card-item" v-for="task in tasks" :key="task.id" @click="onTaskClick(task.id)">
           <span class="item-title">{{ task.title }}</span>
-          <span class="item-icon" @click="onTaskDelete(task.id)">×</span>
+          <span class="item-icon" @click.stop="onTaskDelete(task.id)">×</span>
           <span class="item-description"></span>
         </li>
       </ul>
@@ -42,6 +42,10 @@ export default class extends Vue {
       cardId: this.cardId,
       taskId
     })
+  }
+
+  private onTaskClick(taskId: string): void {
+    this.$router.push({ name: 'Task', params: { id: taskId } })
   }
 }
 </script>
@@ -96,14 +100,16 @@ export default class extends Vue {
   user-select: none;
   position: absolute;
   right: 1rem;
-  bottom: 0;
+  bottom: 0.1rem;
   font-size: 2.4rem;
   cursor: pointer;
   color: rgba(0, 0, 0, 0.5);
+  transition: color 0.1s ease;
 }
 
 .card-item:hover > .item-icon:hover {
   color: rgb(175, 0, 0);
+  transform: scale(1.1);
 }
 
 .item-description {
