@@ -20,13 +20,15 @@
         @drop.stop="onDrop"
         class="card-list"
       >
-        <card-task
-          v-for="task in tasks"
-          :key="task.id"
-          :task="task"
-          :cardId="cardId"
-          @click="$emit('on-task-click', task, cardId)"
-        />
+        <transition-group name="fade" mode="out-in">
+          <card-task
+            v-for="task in tasks"
+            :key="task.id"
+            :task="task"
+            :cardId="cardId"
+            @click="$emit('on-task-click', task, cardId)"
+          />
+        </transition-group>
       </ul>
       <input
         v-model="newTaskTitle"
@@ -174,4 +176,6 @@ h3.card-title:hover {
   background-color: transparent;
   width: 80%;
 }
+
+@import '../assets/transition.css';
 </style>

@@ -74,19 +74,5 @@ export default class extends Vue {
   grid-gap: 20px;
 }
 
-/*transition*/
-.fade-enter-active {
-  animation: fade-in 0.2s;
-}
-.fade-leave-active {
-  animation: fade-in 0.2s reverse;
-}
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
+@import '../assets/transition.css';
 </style>
