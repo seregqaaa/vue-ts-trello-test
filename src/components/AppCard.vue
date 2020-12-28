@@ -1,5 +1,5 @@
 <template>
-  <div @dragover.prevent @dragenter.prevent @drop.stop="onDrop" class="card-wrapper">
+  <div class="card-wrapper">
     <div class="card">
       <div class="title-wrapper">
         <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ title }}</h3>
@@ -13,7 +13,13 @@
           class="card-title"
         />
       </div>
-      <ul class="card-list">
+      <ul
+        @dragover.prevent.stop
+        @dragenter.prevent.stop="onDragOver"
+        @dragleave.prevent.stop="onDragOver"
+        @drop.stop="onDrop"
+        class="card-list"
+      >
         <card-task
           v-for="task in tasks"
           :key="task.id"
@@ -80,7 +86,8 @@ export default class extends Vue {
     this.$store.dispatch(REMOVE_CARD, this.cardId)
   }
 
-  private onDrop(event: DragEvent | null): void {
+  private onDrop(event: DragEvent | any): void {
+    event.currentTarget.classList.toggle('hovered')
     if (event && event.dataTransfer) {
       const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
 
@@ -91,6 +98,10 @@ export default class extends Vue {
         this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
       }
     }
+  }
+
+  private onDragOver(event: any): void {
+    event.currentTarget.classList.toggle('hovered')
   }
 }
 </script>
@@ -142,6 +153,18 @@ export default class extends Vue {
 
 h3.card-title:hover {
   background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+}
+
+.card-list {
+  min-height: 20px;
+  border: 3px dashed transparent;
+  border-radius: 10px;
+}
+
+.hovered {
+  border: 3px dashed #ccc;
+  transition: border 0.133s ease;
 }
 
 .new-task {

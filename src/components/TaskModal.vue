@@ -103,6 +103,7 @@ export default class extends Vue {
 
 h1.modal-title:hover {
   background: #ccc;
+  border-radius: 5px;
 }
 
 .title-wrapper {

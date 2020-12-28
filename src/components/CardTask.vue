@@ -87,7 +87,7 @@ export default class extends Vue {
 }
 
 .item-icon {
-  display: none;
+  opacity: 0;
 }
 
 .item-description {
@@ -104,7 +104,9 @@ export default class extends Vue {
   cursor: pointer;
   color: rgba(0, 0, 0, 0.5);
   transform: scale(1.3);
-  transition: color 0.1s ease;
+  opacity: 1;
+  transition-property: color, opacity;
+  transition-duration: 0.2s;
 }
 
 .card-item:hover .item-icon:hover {
