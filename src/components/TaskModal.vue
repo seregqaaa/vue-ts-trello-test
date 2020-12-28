@@ -60,6 +60,7 @@ export default class extends Vue {
   private onTitleFocus(): void {
     this.isTitleEditing = true
     const timeoutID = setTimeout(() => {
+      // @ts-expect-error
       this.$refs.modalTitleInput.focus()
       clearTimeout(timeoutID)
     }, 0)

@@ -74,6 +74,7 @@ export default class extends Vue {
   private onTitleFocus() {
     this.isTitleEditing = true
     const timeoutID = setTimeout(() => {
+      // @ts-expect-error
       this.$refs.cardTitleInput.focus()
       clearTimeout(timeoutID)
     }, 0)
