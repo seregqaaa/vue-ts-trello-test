@@ -1,5 +1,5 @@
 <template>
-  <div class="new-card-wrapper" @click="onClick">
+  <div class="new-card-wrapper" @click="onClick" title="Create new card">
     <div class="new-card">
       <button class="create">+</button>
     </div>
@@ -27,7 +27,7 @@ export default class extends Vue {
 .new-card-wrapper {
   margin: 15px;
   width: 300px;
-  cursor: pointer;
+  cursor: cell;
 }
 
 .new-card {
@@ -35,7 +35,7 @@ export default class extends Vue {
   justify-content: center;
   align-items: center;
   background-color: transparent;
-  border: 5px dashed rgba(255, 255, 255, 0.5);
+  border: 5px solid rgba(255, 255, 255, 0.5);
   border-radius: 25px;
   height: 140px;
 }
@@ -51,5 +51,6 @@ export default class extends Vue {
   color: rgba(255, 255, 255, 0.5);
   background-color: transparent;
   user-select: none;
+  cursor: cell;
 }
 </style>

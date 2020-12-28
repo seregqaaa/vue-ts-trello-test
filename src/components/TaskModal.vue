@@ -6,6 +6,7 @@
         <input
           v-else
           class="modal-title"
+          placeholder="Title of the task can not be empty"
           type="text"
           v-model="title"
           ref="modalTitleInput"
@@ -33,8 +34,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class extends Vue {
-  @Prop() task!: Task
-  @Prop() cardId!: string
+  @Prop({ required: true }) readonly task!: Task
+  @Prop({ required: true }) readonly cardId!: string
   private title = this.task.title
   private description = this.task.description || ''
   private isTitleEditing = false
@@ -42,7 +43,7 @@ export default class extends Vue {
   private onAccept(): void {
     if (this.title !== this.task.title || this.description !== this.task.description) {
       const updatedTask = { ...this.task }
-      if (this.title) {
+      if (this.title.trim()) {
         updatedTask.title = this.title
       }
       if (this.description !== null) {
@@ -68,6 +69,7 @@ export default class extends Vue {
 
   private onTitleBlur(): void {
     this.isTitleEditing = false
+    this.title = this.task.title
   }
 }
 </script>
@@ -114,6 +116,12 @@ h1.modal-title:hover {
 
 .title-wrapper input {
   display: block;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+.title-wrapper input::placeholder {
+  font-size: 1.4rem;
 }
 
 .modal-body p {

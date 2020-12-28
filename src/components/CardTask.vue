@@ -27,8 +27,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class extends Vue {
-  @Prop() task!: Task
-  @Prop() cardId!: string
+  @Prop({ required: true }) readonly task!: Task
+  @Prop({ required: true }) readonly cardId!: string
 
   private onTaskDelete(): void {
     this.$store.dispatch(REMOVE_TASK, {

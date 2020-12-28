@@ -11,6 +11,7 @@
           v-model="cardTitle"
           type="text"
           class="card-title"
+          placeholder="Title of the card can not be empty"
         />
       </div>
       <ul
@@ -33,6 +34,7 @@
       <input
         v-model="newTaskTitle"
         @keypress.enter.stop="onTaskEnter"
+        ref="newTaskInput"
         type="text"
         class="new-task"
         placeholder="+ Create new task"
@@ -54,21 +56,34 @@ import { Component, Vue, Prop } from 'vue-property-decorator'
   components: { CardTask }
 })
 export default class extends Vue {
-  @Prop() private title!: string
-  @Prop() private tasks!: Array<Task>
-  @Prop() private cardId!: string
+  @Prop({ required: true }) readonly title!: string
+  @Prop({ required: true }) readonly tasks!: Array<Task>
+  @Prop({ required: true }) readonly cardId!: string
 
   private newTaskTitle = ''
   private isTitleEditing = false
   private cardTitle = this.title
 
   private onTaskEnter(): void {
-    const newTask: Task = {
-      id: uuid(),
-      title: this.newTaskTitle
+    if (this.newTaskTitle.trim()) {
+      const newTask: Task = {
+        id: uuid(),
+        title: this.newTaskTitle
+      }
+      this.$store.dispatch(ADD_TASK, { newTask, cardId: this.cardId })
+      this.newTaskTitle = ''
+    } else {
+      // @ts-expect-error
+      const prevPlaceholder: string = this.$refs.newTaskInput.placeholder
+      // @ts-expect-error
+      this.$refs.newTaskInput.placeholder = 'Title of the task can not be empty'
+
+      const timeoutId = setTimeout(() => {
+        // @ts-expect-error
+        this.$refs.newTaskInput.placeholder = prevPlaceholder
+        clearTimeout(timeoutId)
+      }, 1500)
     }
-    this.$store.dispatch(ADD_TASK, { newTask, cardId: this.cardId })
-    this.newTaskTitle = ''
   }
 
   private onTitleFocus() {
@@ -81,8 +96,13 @@ export default class extends Vue {
   }
 
   private onNewCardTitle(): void {
-    this.isTitleEditing = false
-    this.$emit('on-new-card-title', this.cardId, this.cardTitle)
+    if (this.cardTitle) {
+      this.isTitleEditing = false
+      this.$emit('on-new-card-title', this.cardId, this.cardTitle)
+    } else {
+      this.isTitleEditing = false
+      this.cardTitle = this.title
+    }
   }
 
   private onCardRemove(): void {
@@ -130,6 +150,15 @@ export default class extends Vue {
   font-size: 2.4rem;
   margin-bottom: 2rem;
   text-align: center;
+  border-radius: 10px;
+}
+
+input.card-title {
+  border: 1px solid #ccc;
+}
+
+.card-title::placeholder {
+  font-size: 1.4rem;
 }
 
 .card-remove {
