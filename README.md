@@ -1,4 +1,6 @@
-# VUE.js + TypeScript
+# VUE.js + TypeScript (test)
+
+[GitHub Pages Link](https://siga44.github.io/vue-ts-trello-test/)
 
 `$ yarn install` or `$ npm install` to install deps
 
