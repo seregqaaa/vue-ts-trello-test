@@ -1,24 +1,5 @@
-# vue-trello
+# VUE.js + TypeScript
 
-## Project setup
-```
-npm install
-```
+`$ yarn install` or `$ npm install` to install deps
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+`$ yarn serve` or `$ npm run serve` to start dev server

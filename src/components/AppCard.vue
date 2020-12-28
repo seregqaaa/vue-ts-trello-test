@@ -1,5 +1,5 @@
 <template>
-  <div class="card-wrapper">
+  <div @dragover.prevent @dragenter.prevent @drop.stop="onDrop" class="card-wrapper">
     <div class="card">
       <div class="title-wrapper">
         <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ title }}</h3>
@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import CardTask from '@/components/CardTask.vue'
-import { ADD_TASK, REMOVE_CARD } from '@/constants'
+import { ADD_TASK, REMOVE_CARD, REMOVE_TASK } from '@/constants'
 
 import { Task } from '@/types'
 import { uuid } from '@/utils'
@@ -78,6 +78,19 @@ export default class extends Vue {
 
   private onCardRemove(): void {
     this.$store.dispatch(REMOVE_CARD, this.cardId)
+  }
+
+  private onDrop(event: DragEvent | null): void {
+    if (event && event.dataTransfer) {
+      const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
+
+      if (cardId === this.cardId) {
+        return event.preventDefault()
+      } else {
+        this.$store.dispatch(ADD_TASK, { cardId: this.cardId, newTask })
+        this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
+      }
+    }
   }
 }
 </script>

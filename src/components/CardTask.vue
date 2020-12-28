@@ -1,5 +1,11 @@
 <template>
-  <li class="card-item" @click="$emit('click')">
+  <li
+    class="card-item"
+    draggable="true"
+    @dragstart.stop.self="onDragStart"
+    @dragend.stop.self="onDragEnd"
+    @click="$emit('click')"
+  >
     <div class="item-body">
       <span class="item-title">{{ task.title }}</span>
       <span class="item-description">{{
@@ -29,6 +35,22 @@ export default class extends Vue {
       cardId: this.cardId,
       taskId: this.task.id
     })
+  }
+
+  private onDragStart({ target, dataTransfer }: any): void {
+    const timeoutId = setTimeout(() => {
+      target.classList.toggle('invisible')
+      clearTimeout(timeoutId)
+    }, 0)
+
+    dataTransfer.effectAllowed = 'move'
+    dataTransfer.dropEffect = 'move'
+
+    dataTransfer.setData('payload', JSON.stringify({ cardId: this.cardId, newTask: this.task }))
+  }
+
+  private onDragEnd({ target }: any): void {
+    target.classList.toggle('invisible')
   }
 }
 </script>
@@ -88,5 +110,9 @@ export default class extends Vue {
 .card-item:hover .item-icon:hover {
   color: rgb(175, 0, 0);
   transform: scale(1.4);
+}
+
+.invisible {
+  visibility: hidden;
 }
 </style>
