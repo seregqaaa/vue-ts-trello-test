@@ -1,6 +1,8 @@
 .DS_Store
 node_modules
 /dist
+*lock.json
+*.lock
 
 
 # local env files
