@@ -10,9 +10,11 @@ import {
   CARD,
   UPDATE_CARD_TITLE,
   UPDATE_TASK,
-  REMOVE_CARD
+  REMOVE_CARD,
+  INSERT_TASK,
+  INSERT_TASK_SAME
 } from '@/constants'
-import { Card, State, Task } from '@/types'
+import { Card, NumberObj, State, StringObj, Task } from '@/types'
 import { findById, findIndexById, saveStatePlugin } from '@/utils'
 import Vue from 'vue'
 import Vuex, { Commit } from 'vuex'
@@ -29,7 +31,7 @@ export default new Vuex.Store({
     [ADD_CARD](state: State, newCard: Card) {
       state.cards.push(newCard)
     },
-    [REMOVE_TASK](state: State, { cardIndex, taskIndex }: { cardIndex: number; taskIndex: number }): void {
+    [REMOVE_TASK](state: State, { cardIndex, taskIndex }: NumberObj): void {
       state.cards[cardIndex].tasks.splice(taskIndex, 1)
     },
     [REMOVE_CARD](state: State, cardIndex: number) {
@@ -42,6 +44,25 @@ export default new Vuex.Store({
     },
     [UPDATE_CARD_TITLE](state: State, { cardIndex, cardTitle }: { cardIndex: number; cardTitle: string }): void {
       state.cards[cardIndex].title = cardTitle
+    },
+    [INSERT_TASK](
+      state: State,
+      { cardIndex, taskIndex, newTask }: { cardIndex: number; taskIndex: number; newTask: Task }
+    ): void {
+      state.cards[cardIndex].tasks.splice(taskIndex, 0, newTask)
+    },
+    [INSERT_TASK_SAME](
+      state: State,
+      {
+        cardIndex,
+        taskIndex,
+        targetTaskIndex,
+        task,
+        targetTask
+      }: { cardIndex: number; taskIndex: number; targetTaskIndex: number; task: Task; targetTask: Task }
+    ) {
+      state.cards[cardIndex].tasks.splice(taskIndex, 1)
+      state.cards[cardIndex].tasks.splice(targetTaskIndex, 0, task)
     }
   },
   actions: {
@@ -51,7 +72,7 @@ export default new Vuex.Store({
     [ADD_CARD]({ commit }: { commit: Commit }, payload): void {
       commit(ADD_CARD, payload)
     },
-    [REMOVE_TASK](ctx, { cardId, taskId }: { cardId: string; taskId: string }): void {
+    [REMOVE_TASK](ctx, { cardId, taskId }: StringObj): void {
       ctx.commit(REMOVE_TASK, {
         cardIndex: ctx.getters[CARD_INDEX](cardId),
         taskIndex: ctx.getters[TASK_INDEX](cardId, taskId)
@@ -63,8 +84,24 @@ export default new Vuex.Store({
     [UPDATE_TASK](ctx, { updatedTask, cardId }: { updatedTask: Task; cardId: string }): void {
       ctx.commit(UPDATE_TASK, { updatedTask, cardIndex: ctx.getters[CARD_INDEX](cardId) })
     },
-    [UPDATE_CARD_TITLE](ctx, { cardId, cardTitle }: { [type: string]: string }): void {
+    [UPDATE_CARD_TITLE](ctx, { cardId, cardTitle }: StringObj): void {
       ctx.commit(UPDATE_CARD_TITLE, { cardIndex: ctx.getters[CARD_INDEX](cardId), cardTitle })
+    },
+    [INSERT_TASK](ctx, payload: { newTask: Task; cardId: string; taskId: string }) {
+      ctx.commit(INSERT_TASK, {
+        cardIndex: ctx.getters[CARD_INDEX](payload.cardId),
+        taskIndex: ctx.getters[TASK_INDEX](payload.cardId, payload.taskId),
+        newTask: payload.newTask
+      })
+    },
+    [INSERT_TASK_SAME](ctx, { cardId, task, targetTask }: { task: Task; cardId: string; targetTask: Task }) {
+      ctx.commit(INSERT_TASK_SAME, {
+        cardIndex: ctx.getters[CARD_INDEX](cardId),
+        taskIndex: ctx.getters[TASK_INDEX](cardId, task.id),
+        targetTaskIndex: ctx.getters[TASK_INDEX](cardId, targetTask.id),
+        task,
+        targetTask
+      })
     }
   },
   getters: {

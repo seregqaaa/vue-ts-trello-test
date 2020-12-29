@@ -13,3 +13,11 @@ export type Card = {
 export type State = {
   cards: Array<Card>
 }
+
+export type StringObj = {
+  [type: string]: string
+}
+
+export type NumberObj = {
+  [type: string]: number
+}

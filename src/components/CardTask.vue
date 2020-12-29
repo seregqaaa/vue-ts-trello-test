@@ -2,8 +2,12 @@
   <li
     class="card-item"
     draggable="true"
-    @dragstart.stop.self="onDragStart"
-    @dragend.stop.self="onDragEnd"
+    @dragstart.self="onDragStart"
+    @dragend.self="onDragEnd"
+    @dragover.prevent.stop
+    @dragenter.prevent="onDragEnter"
+    @dragleave.prevent="onDragLeave"
+    @drop.prevent.stop="onDrop"
     @click="$emit('click')"
   >
     <div class="item-body">
@@ -21,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { REMOVE_TASK } from '@/constants'
+import { INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, TASK_INDEX } from '@/constants'
 import { Task } from '@/types'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
@@ -39,7 +43,7 @@ export default class extends Vue {
 
   private onDragStart({ target, dataTransfer }: any): void {
     const timeoutId = setTimeout(() => {
-      target.classList.toggle('invisible')
+      target.classList.add('invisible')
       clearTimeout(timeoutId)
     }, 0)
 
@@ -50,13 +54,40 @@ export default class extends Vue {
   }
 
   private onDragEnd({ target }: any): void {
-    target.classList.toggle('invisible')
+    target.classList.remove('invisible')
+  }
+
+  private onDragEnter(event: DragEvent | any): void {
+    event.currentTarget.classList.add('card-item-hovered')
+  }
+
+  private onDragLeave(event: DragEvent | any): void {
+    event.currentTarget.classList.remove('card-item-hovered')
+  }
+
+  private onDrop(event: DragEvent | any): void {
+    event.currentTarget.classList.remove('card-item-hovered')
+    if (event && event.dataTransfer) {
+      const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
+
+      if (cardId === this.cardId) {
+        this.$store.dispatch(INSERT_TASK_SAME, { cardId, task: newTask, targetTask: this.task })
+      } else {
+        this.$store.dispatch(INSERT_TASK, {
+          cardId: this.cardId,
+          taskId: this.task.id,
+          newTask
+        })
+        this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
+      }
+    }
   }
 }
 </script>
 
 <style scoped>
 .card-item {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -66,11 +97,33 @@ export default class extends Vue {
   transition: all 0.2s ease;
 }
 
+.card-item::before {
+  content: '';
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 3.5rem;
+  top: 0;
+  left: 0;
+  border: 3px dashed transparent;
+  border-radius: 1rem;
+  transition: border 0.133s;
+}
+
+.card-item-hovered.card-item {
+  padding-top: 5rem;
+}
+
+.card-item-hovered.card-item::before {
+  display: block;
+  border: 3px dashed #ccc;
+}
+
 .card-item:last-child {
   margin-bottom: 0;
 }
 
-.card-item:hover {
+.card-item:hover:not(.card-item-hovered) {
   border-radius: 5px;
   background-color: rgba(0, 0, 0, 0.05);
 }

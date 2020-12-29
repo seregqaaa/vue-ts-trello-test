@@ -15,10 +15,10 @@
         />
       </div>
       <ul
-        @dragover.prevent.stop
-        @dragenter.prevent.stop="onDragOver"
-        @dragleave.prevent.stop="onDragOver"
-        @drop.stop="onDrop"
+        @dragover.prevent
+        @drop="onDrop"
+        @dragenter.prevent="onDragEnter"
+        @dragleave.prevent="onDragLeave"
         class="card-list"
       >
         <transition-group name="fade" mode="out-in">
@@ -28,6 +28,7 @@
             :task="task"
             :cardId="cardId"
             @click="$emit('on-task-click', task, cardId)"
+            @on-drop="onDrop"
           />
         </transition-group>
       </ul>
@@ -110,7 +111,7 @@ export default class extends Vue {
   }
 
   private onDrop(event: DragEvent | any): void {
-    event.currentTarget.classList.toggle('hovered')
+    event.currentTarget.classList.remove('hovered')
     if (event && event.dataTransfer) {
       const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
 
@@ -123,8 +124,12 @@ export default class extends Vue {
     }
   }
 
-  private onDragOver(event: any): void {
-    event.currentTarget.classList.toggle('hovered')
+  private onDragEnter(event: DragEvent | any): void {
+    event.currentTarget.classList.add('hovered')
+  }
+
+  private onDragLeave(event: DragEvent | any): void {
+    event.currentTarget.classList.remove('hovered')
   }
 }
 </script>
