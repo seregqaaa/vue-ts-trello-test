@@ -1,9 +1,10 @@
 <template>
   <li
     class="card-item"
+    title="Hold and move to drag. Click to open."
     draggable="true"
-    @dragstart.self="onDragStart"
-    @dragend.self="onDragEnd"
+    @dragstart.self.stop="onDragStart"
+    @dragend.self.stop="onDragEnd"
     @dragover.prevent.stop
     @dragenter.prevent="onDragEnter"
     @dragleave.prevent="onDragLeave"
@@ -25,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, TASK_INDEX } from '@/constants'
+import { DRAGGING_ELEMENT, INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, SET_DRAGGING, TASK_INDEX } from '@/constants'
 import { Task } from '@/types'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
@@ -33,6 +34,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 export default class extends Vue {
   @Prop({ required: true }) readonly task!: Task
   @Prop({ required: true }) readonly cardId!: string
+
+  private get draggingElementType(): string {
+    return this.$store.getters[DRAGGING_ELEMENT]
+  }
 
   private onTaskDelete(): void {
     this.$store.dispatch(REMOVE_TASK, {
@@ -42,6 +47,7 @@ export default class extends Vue {
   }
 
   private onDragStart({ target, dataTransfer }: any): void {
+    this.$store.dispatch(SET_DRAGGING, 'task')
     const timeoutId = setTimeout(() => {
       target.classList.add('invisible')
       clearTimeout(timeoutId)
@@ -54,31 +60,42 @@ export default class extends Vue {
   }
 
   private onDragEnd({ target }: any): void {
+    this.$store.dispatch(SET_DRAGGING, null)
     target.classList.remove('invisible')
   }
 
   private onDragEnter(event: DragEvent | any): void {
-    event.currentTarget.classList.add('card-item-hovered')
+    if (this.draggingElementType === 'task') {
+      event.currentTarget.classList.add('card-item-hovered')
+    }
   }
 
   private onDragLeave(event: DragEvent | any): void {
-    event.currentTarget.classList.remove('card-item-hovered')
+    if (this.draggingElementType === 'task') {
+      event.currentTarget.classList.remove('card-item-hovered')
+    }
   }
 
   private onDrop(event: DragEvent | any): void {
-    event.currentTarget.classList.remove('card-item-hovered')
-    if (event && event.dataTransfer) {
-      const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
+    if (this.draggingElementType === 'task') {
+      event.currentTarget.classList.remove('card-item-hovered')
+      if (event && event.dataTransfer) {
+        const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
 
-      if (cardId === this.cardId) {
-        this.$store.dispatch(INSERT_TASK_SAME, { cardId, task: newTask, targetTask: this.task })
-      } else {
-        this.$store.dispatch(INSERT_TASK, {
-          cardId: this.cardId,
-          taskId: this.task.id,
-          newTask
-        })
-        this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
+        if (!newTask) {
+          return event.preventDefault()
+        }
+
+        if (cardId === this.cardId) {
+          this.$store.dispatch(INSERT_TASK_SAME, { cardId, task: newTask, targetTask: this.task })
+        } else {
+          this.$store.dispatch(INSERT_TASK, {
+            cardId: this.cardId,
+            taskId: this.task.id,
+            newTask
+          })
+          this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
+        }
       }
     }
   }
@@ -168,6 +185,6 @@ export default class extends Vue {
 }
 
 .invisible {
-  visibility: hidden;
+  opacity: 0.3;
 }
 </style>

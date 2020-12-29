@@ -10,8 +10,11 @@ export type Card = {
   id: string
 }
 
+export type Dragging = 'card' | 'task' | null
+
 export type State = {
   cards: Array<Card>
+  draggingElementType: Dragging
 }
 
 export type StringObj = {

@@ -19,4 +19,9 @@
 ul {
   list-style-type: none;
 }
+
+body {
+  background-color: rgb(10, 10, 30);
+  height: 100vh;
+}
 </style>

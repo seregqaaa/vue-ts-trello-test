@@ -1,5 +1,12 @@
 <template>
-  <div class="card-wrapper">
+  <div
+    class="card-wrapper"
+    draggable="true"
+    @dragstart.self="onDragStart"
+    @dragend.self="onDragEnd"
+    @dragover.prevent
+    @drop="onCardDrop"
+  >
     <div class="card">
       <div class="title-wrapper">
         <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ title }}</h3>
@@ -15,8 +22,8 @@
         />
       </div>
       <ul
-        @dragover.prevent
-        @drop="onDrop"
+        @dragover.prevent.stop
+        @drop.stop="onTaskDrop"
         @dragenter.prevent="onDragEnter"
         @dragleave.prevent="onDragLeave"
         class="card-list"
@@ -28,7 +35,6 @@
             :task="task"
             :cardId="cardId"
             @click="$emit('on-task-click', task, cardId)"
-            @on-drop="onDrop"
           />
         </transition-group>
       </ul>
@@ -47,7 +53,7 @@
 
 <script lang="ts">
 import CardTask from '@/components/CardTask.vue'
-import { ADD_TASK, REMOVE_CARD, REMOVE_TASK } from '@/constants'
+import { ADD_TASK, DRAGGING_ELEMENT, REMOVE_CARD, REMOVE_TASK, SET_DRAGGING } from '@/constants'
 
 import { Task } from '@/types'
 import { uuid } from '@/utils'
@@ -60,6 +66,10 @@ export default class extends Vue {
   @Prop({ required: true }) readonly title!: string
   @Prop({ required: true }) readonly tasks!: Array<Task>
   @Prop({ required: true }) readonly cardId!: string
+
+  private get draggingElementType(): string {
+    return this.$store.getters[DRAGGING_ELEMENT]
+  }
 
   private newTaskTitle = ''
   private isTitleEditing = false
@@ -110,7 +120,29 @@ export default class extends Vue {
     this.$store.dispatch(REMOVE_CARD, this.cardId)
   }
 
-  private onDrop(event: DragEvent | any): void {
+  private onDragStart({ target, dataTransfer }: any): void {
+    this.$store.dispatch(SET_DRAGGING, 'card')
+    // const timeoutId = setTimeout(() => {
+    //   target.classList.add('invisible')
+    //   clearTimeout(timeoutId)
+    // }, 0)
+
+    // dataTransfer.effectAllowed = 'move'
+    // dataTransfer.dropEffect = 'move'
+
+    // dataTransfer.setData('payload', JSON.stringify({ cardId: this.cardId, newTask: this.task }))
+  }
+
+  private onDragEnd({ target }: any): void {
+    this.$store.dispatch(SET_DRAGGING, null)
+    // target.classList.remove('invisible')
+  }
+
+  private onCardDrop(event: DragEvent | any): void {
+    // TODO: card drag&drop
+  }
+
+  private onTaskDrop(event: DragEvent | any): void {
     event.currentTarget.classList.remove('hovered')
     if (event && event.dataTransfer) {
       const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
@@ -136,6 +168,7 @@ export default class extends Vue {
 
 <style scoped>
 .card {
+  width: 350px;
   position: relative;
   display: flex;
   flex-flow: column nowrap;
@@ -143,6 +176,7 @@ export default class extends Vue {
   background-color: #eee;
   border-radius: 25px;
   transition: all 0.2s ease;
+  margin-right: 20px;
 }
 
 .title-wrapper > input {
