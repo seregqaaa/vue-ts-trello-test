@@ -26,7 +26,16 @@
 </template>
 
 <script lang="ts">
-import { DRAGGING_ELEMENT, INSERT_CARD, INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, SET_DRAGGING } from '@/constants'
+import {
+  DRAGGING_ELEMENT,
+  INSERT_CARD,
+  INSERT_TASK,
+  INSERT_TASK_SAME,
+  REMOVE_TASK,
+  SET_DRAGGING,
+  TASKS,
+  TASK_INDEX
+} from '@/constants'
 import { Card, Dragging, Task } from '@/types'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
@@ -47,7 +56,7 @@ export default class extends Vue {
   }
 
   private onDragStart({ target, dataTransfer }: any): void {
-    this.$store.dispatch(SET_DRAGGING, { type: 'task' })
+    this.$store.dispatch(SET_DRAGGING, { type: 'task', taskId: this.task.id, cardId: this.cardId })
     const timeoutId = setTimeout(() => {
       target.classList.add('invisible')
       clearTimeout(timeoutId)
@@ -60,12 +69,19 @@ export default class extends Vue {
   }
 
   private onDragEnd({ target }: any): void {
-    this.$store.dispatch(SET_DRAGGING, { type: null })
+    this.$store.dispatch(SET_DRAGGING, { type: null, cardId: null, taskId: null })
     target.classList.remove('invisible')
   }
 
   private onDragEnter(event: DragEvent | any): void {
     if (this.dragging.type === 'task') {
+      if (
+        this.cardId === this.dragging.cardId &&
+        this.$store.getters[TASK_INDEX](this.cardId, this.task.id) ===
+          this.$store.getters[TASKS](this.cardId).length - 1
+      ) {
+        event.currentTarget.classList.add('last-item')
+      }
       event.currentTarget.classList.add('card-item-hovered')
     }
   }
@@ -73,6 +89,7 @@ export default class extends Vue {
   private onDragLeave(event: DragEvent | any): void {
     if (this.dragging.type === 'task') {
       event.currentTarget.classList.remove('card-item-hovered')
+      event.currentTarget.classList.remove('last-item')
     }
   }
 
@@ -126,15 +143,27 @@ export default class extends Vue {
   position: absolute;
   width: 100%;
   height: 3.5rem;
-  top: 0;
   left: 0;
   border: 3px dashed transparent;
   border-radius: 1rem;
   transition: border 0.133s;
 }
 
-.card-item-hovered.card-item {
+.card-item-hovered:not(.invisible).card-item {
   padding-top: 5rem;
+}
+
+.card-item-hovered:not(.invisible).card-item.last-item {
+  padding-top: 0.5rem;
+  padding-bottom: 5rem;
+}
+
+.card-item-hovered.last-item.card-item::before {
+  bottom: 0;
+}
+
+.card-item-hovered:not(.last-item).card-item::before {
+  top: 0;
 }
 
 .card-item-hovered.card-item::before {

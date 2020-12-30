@@ -12,7 +12,8 @@ export type Card = {
 
 export type Dragging = {
   type: 'card' | 'task' | null
-  id: string | undefined
+  cardId: string | null
+  taskId: string | null
 }
 
 export type State = {

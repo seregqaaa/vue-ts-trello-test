@@ -119,7 +119,7 @@ export default class extends Vue {
   }
 
   private onDragStart(event: DragEvent | any): void {
-    this.$store.dispatch(SET_DRAGGING, { type: 'card' })
+    this.$store.dispatch(SET_DRAGGING, { type: 'card', cardId: this.card.id, taskId: null })
     const timeoutId = setTimeout(() => {
       event.target.classList.add('invisible')
       clearTimeout(timeoutId)
@@ -132,7 +132,7 @@ export default class extends Vue {
   }
 
   private onDragEnd({ target }: any): void {
-    this.$store.dispatch(SET_DRAGGING, { type: null })
+    this.$store.dispatch(SET_DRAGGING, { type: null, cardId: null, taskId: null })
     target.classList.remove('invisible')
   }
 

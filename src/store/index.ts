@@ -31,7 +31,8 @@ export default new Vuex.Store({
     ...(JSON.parse(localStorage.getItem('state')!) || initialState),
     dragging: {
       type: null,
-      id: undefined
+      taskId: null,
+      cardId: null
     }
   },
   mutations: {

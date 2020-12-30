@@ -26,7 +26,8 @@ export default class extends Vue {
 <style scoped>
 .new-card-wrapper {
   margin: 15px;
-  width: 300px;
+  min-width: 300px;
+  padding-right: 20px;
   cursor: cell;
 }
 
