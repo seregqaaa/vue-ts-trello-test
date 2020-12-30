@@ -14,7 +14,9 @@ import {
   INSERT_TASK,
   INSERT_TASK_SAME,
   DRAGGING_ELEMENT,
-  SET_DRAGGING
+  SET_DRAGGING,
+  INSERT_CARD,
+  TASKS
 } from '@/constants'
 import { Card, Dragging, NumberObj, State, StringObj, Task } from '@/types'
 import { findById, findIndexById, saveStatePlugin } from '@/utils'
@@ -27,7 +29,10 @@ export default new Vuex.Store({
   plugins: [saveStatePlugin],
   state: {
     ...(JSON.parse(localStorage.getItem('state')!) || initialState),
-    draggingElementType: null
+    dragging: {
+      type: null,
+      id: undefined
+    }
   },
   mutations: {
     [ADD_TASK](state: State, { newTask, cardIndex }: { newTask: Task; cardIndex: number }): void {
@@ -62,15 +67,18 @@ export default new Vuex.Store({
         cardIndex,
         taskIndex,
         targetTaskIndex,
-        task,
-        targetTask
-      }: { cardIndex: number; taskIndex: number; targetTaskIndex: number; task: Task; targetTask: Task }
+        task
+      }: { cardIndex: number; taskIndex: number; targetTaskIndex: number; task: Task }
     ) {
       state.cards[cardIndex].tasks.splice(taskIndex, 1)
       state.cards[cardIndex].tasks.splice(targetTaskIndex, 0, task)
     },
+    [INSERT_CARD](state: State, payload: { cardIndex: number; targetCardIndex: number; card: Card }): void {
+      state.cards.splice(payload.cardIndex, 1)
+      state.cards.splice(payload.targetCardIndex, 0, payload.card)
+    },
     [SET_DRAGGING](state: State, payload: Dragging) {
-      state.draggingElementType = payload
+      state.dragging = payload
     }
   },
   actions: {
@@ -107,8 +115,14 @@ export default new Vuex.Store({
         cardIndex: ctx.getters[CARD_INDEX](cardId),
         taskIndex: ctx.getters[TASK_INDEX](cardId, task.id),
         targetTaskIndex: ctx.getters[TASK_INDEX](cardId, targetTask.id),
-        task,
-        targetTask
+        task
+      })
+    },
+    [INSERT_CARD](ctx, { card, targetCard }: { [type: string]: Card }): void {
+      ctx.commit(INSERT_CARD, {
+        cardIndex: ctx.getters[CARD_INDEX](card.id),
+        targetCardIndex: ctx.getters[CARD_INDEX](targetCard.id),
+        card
       })
     },
     [SET_DRAGGING]({ commit }: { commit: Commit }, payload: Dragging): void {
@@ -118,12 +132,12 @@ export default new Vuex.Store({
   getters: {
     [CARDS]: (state: State): Array<Card> => state.cards,
     [CARD]: (state: State) => (id: string): Card => findById(state.cards, id),
-    [TASK]: (_: State, getters: any) => (cardId: string, taskId: string): Task => {
-      return findById(getters[CARD](cardId).tasks, taskId)
-    },
+    [TASKS]: (state: State, getters: any) => (id: string): Array<Task> => state.cards[getters[CARD_INDEX](id)].tasks,
+    [TASK]: (_: State, getters: any) => (cardId: string, taskId: string): Task =>
+      findById(getters[CARD](cardId).tasks, taskId),
     [CARD_INDEX]: (state: State) => (id: string): number => findIndexById(state.cards, id),
     [TASK_INDEX]: (_: State, getters: any) => (cardId: string, taskId: string): number =>
       findIndexById(getters[CARD](cardId).tasks, taskId),
-    [DRAGGING_ELEMENT]: (state: State): Dragging => state.draggingElementType
+    [DRAGGING_ELEMENT]: (state: State): Dragging => state.dragging
   }
 })

@@ -26,8 +26,8 @@
 </template>
 
 <script lang="ts">
-import { DRAGGING_ELEMENT, INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, SET_DRAGGING, TASK_INDEX } from '@/constants'
-import { Task } from '@/types'
+import { DRAGGING_ELEMENT, INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, SET_DRAGGING } from '@/constants'
+import { Dragging, Task } from '@/types'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
@@ -35,7 +35,7 @@ export default class extends Vue {
   @Prop({ required: true }) readonly task!: Task
   @Prop({ required: true }) readonly cardId!: string
 
-  private get draggingElementType(): string {
+  private get dragging(): Dragging {
     return this.$store.getters[DRAGGING_ELEMENT]
   }
 
@@ -65,19 +65,19 @@ export default class extends Vue {
   }
 
   private onDragEnter(event: DragEvent | any): void {
-    if (this.draggingElementType === 'task') {
+    if (this.dragging.type === 'task') {
       event.currentTarget.classList.add('card-item-hovered')
     }
   }
 
   private onDragLeave(event: DragEvent | any): void {
-    if (this.draggingElementType === 'task') {
+    if (this.dragging.type === 'task') {
       event.currentTarget.classList.remove('card-item-hovered')
     }
   }
 
   private onDrop(event: DragEvent | any): void {
-    if (this.draggingElementType === 'task') {
+    if (this.dragging.type === 'task') {
       event.currentTarget.classList.remove('card-item-hovered')
       if (event && event.dataTransfer) {
         const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))

@@ -4,9 +4,7 @@
       <app-card
         v-for="card in cards"
         :key="card.id"
-        :title="card.title"
-        :tasks="card.tasks"
-        :cardId="card.id"
+        :card="card"
         @on-task-click="onTaskClick"
         @on-new-card-title="onNewCardTitle"
       />

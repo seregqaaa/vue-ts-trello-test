@@ -10,11 +10,14 @@ export type Card = {
   id: string
 }
 
-export type Dragging = 'card' | 'task' | null
+export type Dragging = {
+  type: 'card' | 'task' | null
+  id: string | undefined
+}
 
 export type State = {
   cards: Array<Card>
-  draggingElementType: Dragging
+  dragging: Dragging
 }
 
 export type StringObj = {

@@ -9,7 +9,7 @@
   >
     <div class="card">
       <div class="title-wrapper">
-        <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ title }}</h3>
+        <h3 v-if="!isTitleEditing" @click="onTitleFocus" class="card-title">{{ card.title }}</h3>
         <input
           v-else
           @keypress.enter.stop="onNewCardTitle"
@@ -24,17 +24,17 @@
       <ul
         @dragover.prevent.stop
         @drop.stop="onTaskDrop"
-        @dragenter.prevent="onDragEnter"
-        @dragleave.prevent="onDragLeave"
+        @dragenter.prevent="onTaskDragEnter"
+        @dragleave.prevent="onTaskDragLeave"
         class="card-list"
       >
         <transition-group name="fade" mode="out-in">
           <card-task
-            v-for="task in tasks"
+            v-for="task in card.tasks"
             :key="task.id"
             :task="task"
-            :cardId="cardId"
-            @click="$emit('on-task-click', task, cardId)"
+            :cardId="card.id"
+            @click="$emit('on-task-click', task, card.id)"
           />
         </transition-group>
       </ul>
@@ -53,9 +53,9 @@
 
 <script lang="ts">
 import CardTask from '@/components/CardTask.vue'
-import { ADD_TASK, DRAGGING_ELEMENT, REMOVE_CARD, REMOVE_TASK, SET_DRAGGING } from '@/constants'
+import { ADD_TASK, DRAGGING_ELEMENT, INSERT_CARD, REMOVE_CARD, REMOVE_TASK, SET_DRAGGING } from '@/constants'
 
-import { Task } from '@/types'
+import { Card, Task } from '@/types'
 import { uuid } from '@/utils'
 import { Component, Vue, Prop } from 'vue-property-decorator'
 
@@ -63,9 +63,7 @@ import { Component, Vue, Prop } from 'vue-property-decorator'
   components: { CardTask }
 })
 export default class extends Vue {
-  @Prop({ required: true }) readonly title!: string
-  @Prop({ required: true }) readonly tasks!: Array<Task>
-  @Prop({ required: true }) readonly cardId!: string
+  @Prop({ required: true }) readonly card!: Card
 
   private get draggingElementType(): string {
     return this.$store.getters[DRAGGING_ELEMENT]
@@ -73,7 +71,7 @@ export default class extends Vue {
 
   private newTaskTitle = ''
   private isTitleEditing = false
-  private cardTitle = this.title
+  private cardTitle = this.card.title
 
   private onTaskEnter(): void {
     if (this.newTaskTitle.trim()) {
@@ -81,7 +79,7 @@ export default class extends Vue {
         id: uuid(),
         title: this.newTaskTitle
       }
-      this.$store.dispatch(ADD_TASK, { newTask, cardId: this.cardId })
+      this.$store.dispatch(ADD_TASK, { newTask, cardId: this.card.id })
       this.newTaskTitle = ''
     } else {
       // @ts-expect-error
@@ -109,28 +107,28 @@ export default class extends Vue {
   private onNewCardTitle(): void {
     if (this.cardTitle) {
       this.isTitleEditing = false
-      this.$emit('on-new-card-title', this.cardId, this.cardTitle)
+      this.$emit('on-new-card-title', this.card.id, this.cardTitle)
     } else {
       this.isTitleEditing = false
-      this.cardTitle = this.title
+      this.cardTitle = this.card.title
     }
   }
 
   private onCardRemove(): void {
-    this.$store.dispatch(REMOVE_CARD, this.cardId)
+    this.$store.dispatch(REMOVE_CARD, this.card.id)
   }
 
   private onDragStart({ target, dataTransfer }: any): void {
     this.$store.dispatch(SET_DRAGGING, 'card')
-    // const timeoutId = setTimeout(() => {
-    //   target.classList.add('invisible')
-    //   clearTimeout(timeoutId)
-    // }, 0)
+    const timeoutId = setTimeout(() => {
+      target.classList.add('invisible')
+      clearTimeout(timeoutId)
+    }, 0)
 
-    // dataTransfer.effectAllowed = 'move'
-    // dataTransfer.dropEffect = 'move'
+    dataTransfer.effectAllowed = 'move'
+    dataTransfer.dropEffect = 'move'
 
-    // dataTransfer.setData('payload', JSON.stringify({ cardId: this.cardId, newTask: this.task }))
+    dataTransfer.setData('payload', JSON.stringify({ card: this.card }))
   }
 
   private onDragEnd({ target }: any): void {
@@ -139,29 +137,41 @@ export default class extends Vue {
   }
 
   private onCardDrop(event: DragEvent | any): void {
-    // TODO: card drag&drop
-  }
+    if (this.draggingElementType === 'card') {
+      const { card }: { card: Card } = JSON.parse(event.dataTransfer.getData('payload'))
 
-  private onTaskDrop(event: DragEvent | any): void {
-    event.currentTarget.classList.remove('hovered')
-    if (event && event.dataTransfer) {
-      const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
-
-      if (cardId === this.cardId) {
-        return event.preventDefault()
-      } else {
-        this.$store.dispatch(ADD_TASK, { cardId: this.cardId, newTask })
-        this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
+      if (card.id !== this.card.id) {
+        this.$store.dispatch(INSERT_CARD, { card, targetCard: this.card })
       }
     }
   }
 
-  private onDragEnter(event: DragEvent | any): void {
-    event.currentTarget.classList.add('hovered')
+  private onTaskDrop(event: DragEvent | any): void {
+    if (this.draggingElementType === 'task') {
+      event.currentTarget.classList.remove('hovered')
+      if (event && event.dataTransfer) {
+        const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
+
+        if (cardId === this.card.id) {
+          return event.preventDefault()
+        } else {
+          this.$store.dispatch(ADD_TASK, { cardId: this.card.id, newTask })
+          this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
+        }
+      }
+    }
   }
 
-  private onDragLeave(event: DragEvent | any): void {
-    event.currentTarget.classList.remove('hovered')
+  private onTaskDragEnter(event: DragEvent | any): void {
+    if (this.draggingElementType === 'task') {
+      event.currentTarget.classList.add('hovered')
+    }
+  }
+
+  private onTaskDragLeave(event: DragEvent | any): void {
+    if (this.draggingElementType === 'task') {
+      event.currentTarget.classList.remove('hovered')
+    }
   }
 }
 </script>
@@ -231,6 +241,7 @@ h3.card-title:hover {
   min-height: 20px;
   border: 3px dashed transparent;
   border-radius: 10px;
+  padding: 5px 5px 15px 5px;
 }
 
 .hovered {
