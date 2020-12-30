@@ -105,12 +105,12 @@ export default class extends Vue {
   }
 
   private onNewCardTitle(): void {
-    if (this.cardTitle) {
-      this.isTitleEditing = false
-      this.$emit('on-new-card-title', this.card.id, this.cardTitle)
-    } else {
+    if (!this.cardTitle.trim()) {
       this.isTitleEditing = false
       this.cardTitle = this.card.title
+    } else {
+      this.isTitleEditing = false
+      this.$emit('on-new-card-title', this.card.id, this.cardTitle)
     }
   }
 

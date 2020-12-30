@@ -69,7 +69,9 @@ export default class extends Vue {
 
   private onTitleBlur(): void {
     this.isTitleEditing = false
-    this.title = this.task.title
+    if (!this.title.trim()) {
+      this.title = this.task.title
+    }
   }
 }
 </script>
