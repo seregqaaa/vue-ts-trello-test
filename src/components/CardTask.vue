@@ -26,8 +26,8 @@
 </template>
 
 <script lang="ts">
-import { DRAGGING_ELEMENT, INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, SET_DRAGGING } from '@/constants'
-import { Dragging, Task } from '@/types'
+import { DRAGGING_ELEMENT, INSERT_CARD, INSERT_TASK, INSERT_TASK_SAME, REMOVE_TASK, SET_DRAGGING } from '@/constants'
+import { Card, Dragging, Task } from '@/types'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
@@ -47,7 +47,7 @@ export default class extends Vue {
   }
 
   private onDragStart({ target, dataTransfer }: any): void {
-    this.$store.dispatch(SET_DRAGGING, 'task')
+    this.$store.dispatch(SET_DRAGGING, { type: 'task' })
     const timeoutId = setTimeout(() => {
       target.classList.add('invisible')
       clearTimeout(timeoutId)
@@ -60,7 +60,7 @@ export default class extends Vue {
   }
 
   private onDragEnd({ target }: any): void {
-    this.$store.dispatch(SET_DRAGGING, null)
+    this.$store.dispatch(SET_DRAGGING, { type: null })
     target.classList.remove('invisible')
   }
 
@@ -96,6 +96,12 @@ export default class extends Vue {
           })
           this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
         }
+      }
+    } else if (this.dragging.type === 'card') {
+      const { card }: { card: Card } = JSON.parse(event.dataTransfer.getData('payload'))
+
+      if (card.id !== this.cardId) {
+        this.$store.dispatch(INSERT_CARD, { card, targetCard: this.cardId })
       }
     }
   }

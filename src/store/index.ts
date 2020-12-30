@@ -118,10 +118,10 @@ export default new Vuex.Store({
         task
       })
     },
-    [INSERT_CARD](ctx, { card, targetCard }: { [type: string]: Card }): void {
+    [INSERT_CARD](ctx, { card, targetCard }: { card: Card; targetCard: Card | string }): void {
       ctx.commit(INSERT_CARD, {
         cardIndex: ctx.getters[CARD_INDEX](card.id),
-        targetCardIndex: ctx.getters[CARD_INDEX](targetCard.id),
+        targetCardIndex: ctx.getters[CARD_INDEX](typeof targetCard === 'string' ? targetCard : targetCard.id),
         card
       })
     },
