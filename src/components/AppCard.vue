@@ -82,26 +82,23 @@ export default class extends Vue {
       this.$store.dispatch(ADD_TASK, { newTask, cardId: this.card.id })
       this.newTaskTitle = ''
     } else {
-      // @ts-expect-error
-      const prevPlaceholder: string = this.$refs.newTaskInput.placeholder
-      // @ts-expect-error
-      this.$refs.newTaskInput.placeholder = 'Title of the task can not be empty'
+      const newTaskInput = this.$refs.newTaskInput as HTMLInputElement
+      const prevPlaceholder = newTaskInput.placeholder
+      newTaskInput.placeholder = 'Title of the task can not be empty'
 
       const timeoutId = setTimeout(() => {
-        // @ts-expect-error
-        this.$refs.newTaskInput.placeholder = prevPlaceholder
+        newTaskInput.placeholder = prevPlaceholder
         clearTimeout(timeoutId)
       }, 1500)
     }
   }
 
-  private onTitleFocus() {
+  private onTitleFocus(): void {
     this.isTitleEditing = true
-    const timeoutID = setTimeout(() => {
-      // @ts-expect-error
-      this.$refs.cardTitleInput.focus()
-      clearTimeout(timeoutID)
-    }, 0)
+    this.$nextTick().then((): void => {
+      const cardTitleInput = this.$refs.cardTitleInput as HTMLInputElement
+      cardTitleInput.focus()
+    })
   }
 
   private onNewCardTitle(): void {
@@ -118,27 +115,25 @@ export default class extends Vue {
     this.$store.dispatch(REMOVE_CARD, this.card.id)
   }
 
-  private onDragStart(event: DragEvent | any): void {
-    this.$store.dispatch(SET_DRAGGING, { type: 'card', cardId: this.card.id, taskId: null })
-    const timeoutId = setTimeout(() => {
-      event.target.classList.add('invisible')
-      clearTimeout(timeoutId)
-    }, 0)
+  private onDragStart({ target, dataTransfer }: { target: HTMLDivElement; dataTransfer: DataTransfer }): void {
+    if (target && dataTransfer) {
+      this.$store.dispatch(SET_DRAGGING, { type: 'card', cardId: this.card.id, taskId: null })
+      this.$nextTick().then((): void => {
+        target.classList.add('invisible')
+      })
 
-    event.dataTransfer.effectAllowed = 'move'
-    event.dataTransfer.dropEffect = 'move'
-
-    event.dataTransfer.setData('payload', JSON.stringify({ card: this.card }))
+      dataTransfer.setData('payload', JSON.stringify({ card: this.card }))
+    }
   }
 
-  private onDragEnd({ target }: any): void {
+  private onDragEnd({ target }: { target: HTMLDivElement }): void {
     this.$store.dispatch(SET_DRAGGING, { type: null, cardId: null, taskId: null })
     target.classList.remove('invisible')
   }
 
-  private onCardDrop(event: DragEvent | any): void {
-    if (this.dragging.type === 'card') {
-      const { card }: { card: Card } = JSON.parse(event.dataTransfer.getData('payload'))
+  private onCardDrop({ dataTransfer }: DragEvent): void {
+    if (this.dragging.type === 'card' && dataTransfer) {
+      const { card }: { card: Card } = JSON.parse(dataTransfer.getData('payload'))
 
       if (card.id !== this.card.id) {
         this.$store.dispatch(INSERT_CARD, { card, targetCard: this.card })
@@ -146,9 +141,10 @@ export default class extends Vue {
     }
   }
 
-  private onTaskDrop(event: DragEvent | any): void {
-    if (this.dragging.type === 'task') {
-      event.currentTarget.classList.remove('hovered')
+  private onTaskDrop(event: DragEvent): void {
+    if (this.dragging.type === 'task' && event.currentTarget) {
+      const currentTarget = event.currentTarget as HTMLUListElement
+      currentTarget.classList.remove('hovered')
       if (event && event.dataTransfer) {
         const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
 
@@ -164,15 +160,15 @@ export default class extends Vue {
     }
   }
 
-  private onTaskDragEnter(event: DragEvent | any): void {
+  private onTaskDragEnter({ currentTarget }: { currentTarget: HTMLUListElement }): void {
     if (this.dragging.type === 'task') {
-      event.currentTarget.classList.add('hovered')
+      currentTarget.classList.add('hovered')
     }
   }
 
-  private onTaskDragLeave(event: DragEvent | any): void {
+  private onTaskDragLeave({ currentTarget }: { currentTarget: HTMLUListElement }): void {
     if (this.dragging.type === 'task') {
-      event.currentTarget.classList.remove('hovered')
+      currentTarget.classList.remove('hovered')
     }
   }
 }

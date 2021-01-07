@@ -55,66 +55,59 @@ export default class extends Vue {
     })
   }
 
-  private onDragStart({ target, dataTransfer }: any): void {
+  private onDragStart({ target, dataTransfer }: { target: HTMLLIElement; dataTransfer: DataTransfer }): void {
     this.$store.dispatch(SET_DRAGGING, { type: 'task', taskId: this.task.id, cardId: this.cardId })
-    const timeoutId = setTimeout(() => {
-      target.classList.add('invisible')
-      clearTimeout(timeoutId)
-    }, 0)
-
-    dataTransfer.effectAllowed = 'move'
-    dataTransfer.dropEffect = 'move'
+    this.$nextTick().then((): void => target.classList.add('invisible'))
 
     dataTransfer.setData('payload', JSON.stringify({ cardId: this.cardId, newTask: this.task }))
   }
 
-  private onDragEnd({ target }: any): void {
+  private onDragEnd({ target }: { target: HTMLLIElement }): void {
     this.$store.dispatch(SET_DRAGGING, { type: null, cardId: null, taskId: null })
     target.classList.remove('invisible')
   }
 
-  private onDragEnter(event: DragEvent | any): void {
+  private onDragEnter({ currentTarget }: { currentTarget: HTMLLIElement }): void {
     if (this.dragging.type === 'task') {
+      currentTarget.classList.add('card-item-hovered')
       if (
         this.cardId === this.dragging.cardId &&
         this.$store.getters[TASK_INDEX](this.cardId, this.task.id) ===
           this.$store.getters[TASKS](this.cardId).length - 1
       ) {
-        event.currentTarget.classList.add('last-item')
+        currentTarget.classList.add('last-item')
       }
-      event.currentTarget.classList.add('card-item-hovered')
     }
   }
 
-  private onDragLeave(event: DragEvent | any): void {
+  private onDragLeave({ currentTarget }: { currentTarget: HTMLLIElement }): void {
     if (this.dragging.type === 'task') {
-      event.currentTarget.classList.remove('card-item-hovered')
-      event.currentTarget.classList.remove('last-item')
+      currentTarget.classList.remove('card-item-hovered')
+      currentTarget.classList.remove('last-item')
     }
   }
 
-  private onDrop(event: DragEvent | any): void {
-    if (this.dragging.type === 'task') {
-      event.currentTarget.classList.remove('card-item-hovered')
-      if (event && event.dataTransfer) {
-        const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
+  private onDrop(event: DragEvent): void {
+    if (this.dragging.type === 'task' && event.currentTarget && event.dataTransfer) {
+      const currentTarget = event.currentTarget as HTMLLIElement
+      currentTarget.classList.remove('card-item-hovered')
+      const { cardId, newTask }: { cardId: string; newTask: Task } = JSON.parse(event.dataTransfer.getData('payload'))
 
-        if (!newTask) {
-          return event.preventDefault()
-        }
-
-        if (cardId === this.cardId) {
-          this.$store.dispatch(INSERT_TASK_SAME, { cardId, task: newTask, targetTask: this.task })
-        } else {
-          this.$store.dispatch(INSERT_TASK, {
-            cardId: this.cardId,
-            taskId: this.task.id,
-            newTask
-          })
-          this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
-        }
+      if (!newTask) {
+        return event.preventDefault()
       }
-    } else if (this.dragging.type === 'card') {
+
+      if (cardId === this.cardId) {
+        this.$store.dispatch(INSERT_TASK_SAME, { cardId, task: newTask, targetTask: this.task })
+      } else {
+        this.$store.dispatch(INSERT_TASK, {
+          cardId: this.cardId,
+          taskId: this.task.id,
+          newTask
+        })
+        this.$store.dispatch(REMOVE_TASK, { cardId, taskId: newTask.id })
+      }
+    } else if (this.dragging.type === 'card' && event.dataTransfer) {
       const { card }: { card: Card } = JSON.parse(event.dataTransfer.getData('payload'))
 
       if (card.id !== this.cardId) {
